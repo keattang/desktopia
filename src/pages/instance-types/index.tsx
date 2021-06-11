@@ -1,6 +1,6 @@
 import Container from "@material-ui/core/Container";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import prisma from "../../lib/prisma";
+import prisma from "../../prisma";
 import InstanceList from "../../components/InstanceTypeList";
 import { Box, styled } from "@material-ui/core";
 

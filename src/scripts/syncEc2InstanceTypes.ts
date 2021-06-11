@@ -14,8 +14,8 @@ import {
   PRICING_API_REGION,
   REGIONS,
   SUPPORTED_OPERATING_SYSTEMS,
-} from "../lib/constants";
-import prisma from "../lib/prisma";
+} from "../constants";
+import prisma from "../prisma";
 
 interface IInstanceType {
   name: string;

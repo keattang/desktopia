@@ -1,6 +1,6 @@
 import Container from "@material-ui/core/Container";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { SUPPORTED_REGIONS } from "../../lib/constants";
+import { SUPPORTED_REGIONS } from "../../constants";
 import CreateLocationForm from "../../components/CreateLocationForm";
 import { Vpc } from "@aws-sdk/client-ec2";
 

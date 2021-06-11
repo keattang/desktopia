@@ -1,4 +1,4 @@
-import prisma from "../../../lib/prisma";
+import prisma from "../../../prisma";
 import type { NextApiRequest, NextApiResponse } from "next";
 import {
   EC2Client,

@@ -2,7 +2,7 @@ import { InstanceType, Location } from ".prisma/client";
 import Container from "@material-ui/core/Container";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import CreateInstanceForm from "../../components/CreateInstanceForm";
-import prisma from "../../lib/prisma";
+import prisma from "../../prisma";
 import serialiseDates, {
   MappedDateToIso,
 } from "../../utilities/serialiseDates";
