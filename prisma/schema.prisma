@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model InstanceType {
+  id                 String   @id @default(uuid())
+  name               String
+  vCpus              Int
+  cores              Int?
+  memory             Int
+  networkPerformance String
+  pricePerHour       Float
+  region             String
+  operatingSystem    String
+  dateCreated        DateTime @default(now())
+  dateUpdated        DateTime @updatedAt
+
+  instances Instance[]
+
+  @@unique([name, pricePerHour, region, operatingSystem])
+}
+
+model Location {
+  id          String     @id @default(uuid())
+  name        String
+  region      String
+  vpcId       String     @unique
+  dateCreated DateTime   @default(now())
+  dateUpdated DateTime   @updatedAt
+  Instance    Instance[]
+}
+
+model Instance {
+  id             String       @id @default(uuid())
+  instanceId     String
+  instanceType   InstanceType @relation(fields: [instanceTypeId], references: [id])
+  instanceTypeId String
+  location       Location     @relation(fields: [locationId], references: [id])
+  locationId     String
+  dateCreated    DateTime     @default(now())
+  dateUpdated    DateTime     @updatedAt
+}
