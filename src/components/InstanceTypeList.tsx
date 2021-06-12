@@ -1,8 +1,12 @@
 import * as React from "react";
-import { DataGrid, ColDef, ValueGetterParams } from "@material-ui/data-grid";
+import {
+  DataGrid,
+  GridColDef,
+  GridValueGetterParams,
+} from "@material-ui/data-grid";
 import { SerialisedInstanceType } from "../types";
 
-const columns: ColDef[] = [
+const columns: GridColDef[] = [
   { field: "name", headerName: "Instance Type", width: 200 },
   { field: "vCpus", headerName: "vCPUs", type: "number", width: 130 },
   { field: "cores", headerName: "Cores", type: "number", width: 130 },
@@ -11,7 +15,7 @@ const columns: ColDef[] = [
     headerName: "Memory",
     type: "number",
     width: 130,
-    valueGetter: (params: ValueGetterParams) => {
+    valueGetter: (params: GridValueGetterParams) => {
       const memory = params.value;
       if (!memory) {
         return "-";
@@ -28,7 +32,7 @@ const columns: ColDef[] = [
     field: "pricePerHour",
     headerName: "Price / Hour",
     width: 160,
-    valueGetter: (params: ValueGetterParams) => `$${params.value}`,
+    valueGetter: (params: GridValueGetterParams) => `$${params.value}`,
   },
 ];
 
