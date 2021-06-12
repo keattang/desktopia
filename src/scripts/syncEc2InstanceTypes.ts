@@ -1,13 +1,6 @@
-import {
-  EC2Client,
-  DescribeInstanceTypesCommand,
-  paginateDescribeInstanceTypes,
-} from "@aws-sdk/client-ec2";
-import {
-  GetProductsCommand,
-  paginateGetProducts,
-  PricingClient,
-} from "@aws-sdk/client-pricing";
+import { InstanceType } from ".prisma/client";
+import { EC2Client, paginateDescribeInstanceTypes } from "@aws-sdk/client-ec2";
+import { paginateGetProducts, PricingClient } from "@aws-sdk/client-pricing";
 
 import {
   SUPPORTED_REGIONS,
@@ -16,20 +9,10 @@ import {
   SUPPORTED_OPERATING_SYSTEMS,
 } from "../constants";
 import prisma from "../prisma";
-
-interface IInstanceType {
-  name: string;
-  vCpus: number;
-  cores?: number;
-  memory: number;
-  networkPerformance: string;
-  pricePerHour: number;
-  region: string;
-  operatingSystem: string;
-}
+import { PreSaveInstanceType } from "../types";
 
 type IPartialInstanceType = Omit<
-  IInstanceType,
+  PreSaveInstanceType,
   "pricePerHour" | "operatingSystem"
 >;
 
@@ -119,14 +102,19 @@ const getInstanceTypes = async (region: keyof typeof REGIONS) => {
       const { InstanceType, VCpuInfo, MemoryInfo, GpuInfo, NetworkInfo } =
         result;
 
-      if (InstanceType === undefined) {
+      if (
+        InstanceType === undefined ||
+        VCpuInfo === undefined ||
+        VCpuInfo.DefaultVCpus === undefined
+      ) {
+        // We shouldn't ever get here but we need this to satisfy typescript
         return;
       }
 
       instanceTypes[InstanceType] = {
         name: InstanceType,
-        vCpus: VCpuInfo!.DefaultVCpus!,
-        cores: VCpuInfo!.DefaultCores,
+        vCpus: VCpuInfo.DefaultVCpus,
+        cores: VCpuInfo.DefaultCores || null,
         memory: MemoryInfo!.SizeInMiB!,
         networkPerformance: NetworkInfo!.NetworkPerformance!,
         region,
@@ -142,7 +130,7 @@ const getInstanceTypesWithPrices = async (
   operatingSystems: string[]
 ) => {
   const instanceTypes = await getInstanceTypes(region);
-  const instanceTypesWithPrices: { [key: string]: IInstanceType } = {};
+  const instanceTypesWithPrices: { [key: string]: PreSaveInstanceType } = {};
 
   await Promise.all(
     operatingSystems.map(async (operatingSystem) => {

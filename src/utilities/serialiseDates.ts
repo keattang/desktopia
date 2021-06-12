@@ -9,10 +9,10 @@ const serialiseDates = <T, K extends keyof T>(
   return dateKeys.reduce(
     (agg, key) => {
       const value = obj[key];
-      if (value instanceof Date) {
-        agg[key] = value.toISOString();
-      }
-      return agg;
+      return {
+        ...agg,
+        [key]: value instanceof Date ? value.toISOString : value,
+      };
     },
     { ...obj } as MappedDateToIso<T, K>
   );

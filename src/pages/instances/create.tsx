@@ -3,19 +3,12 @@ import Container from "@material-ui/core/Container";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import CreateInstanceForm from "../../components/CreateInstanceForm";
 import prisma from "../../prisma";
-import serialiseDates, {
-  MappedDateToIso,
-} from "../../utilities/serialiseDates";
+import { SerialisedInstanceType, SerialisedLocation } from "../../types";
+import serialiseDates from "../../utilities/serialiseDates";
 
 interface IServerSideProps {
-  availableLocations: MappedDateToIso<
-    Location,
-    "dateCreated" | "dateUpdated"
-  >[];
-  availableInstanceTypes: MappedDateToIso<
-    InstanceType,
-    "dateCreated" | "dateUpdated"
-  >[];
+  availableLocations: SerialisedLocation[];
+  availableInstanceTypes: SerialisedInstanceType[];
 }
 
 export const getServerSideProps: GetServerSideProps<IServerSideProps> = async ({

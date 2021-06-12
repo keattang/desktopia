@@ -5,6 +5,7 @@ import Button from "@material-ui/core/Button";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { InstanceType, Location } from ".prisma/client";
+import { SerialisedInstanceType, SerialisedLocation } from "../types";
 
 interface ICreateInstanceData {
   locationId: string;
@@ -12,8 +13,8 @@ interface ICreateInstanceData {
 }
 
 interface IProps {
-  availableLocations: Location[];
-  availableInstanceTypes: InstanceType[];
+  availableLocations: SerialisedLocation[];
+  availableInstanceTypes: SerialisedInstanceType[];
   onSubmit: (values: ICreateInstanceData) => void;
 }
 
