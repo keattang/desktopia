@@ -3,31 +3,34 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import prisma from "../../prisma";
 import InstanceList from "../../components/InstanceTypeList";
 import { Box, styled } from "@material-ui/core";
+import serialiseDates from "../../utilities/serialiseDates";
+import { SerialisedInstanceType } from "../../types";
 
-export const getServerSideProps: GetServerSideProps = async ({ params }) => {
-  const instanceTypes = await prisma.instanceType.findMany({
-    orderBy: [
-      {
-        name: "asc",
-      },
-      {
-        vCpus: "asc",
-      },
-    ],
-  });
+interface IServerSideProps {
+  instanceTypes: SerialisedInstanceType[];
+}
 
-  const serialisableInstanceTypes = instanceTypes.map((i) => {
+export const getServerSideProps: GetServerSideProps<IServerSideProps> =
+  async () => {
+    const instanceTypes = await prisma.instanceType.findMany({
+      orderBy: [
+        {
+          name: "asc",
+        },
+        {
+          vCpus: "asc",
+        },
+      ],
+    });
+
+    const serialisableInstanceTypes = instanceTypes.map((i) =>
+      serialiseDates(i, ["dateCreated", "dateUpdated"])
+    );
+
     return {
-      ...i,
-      dateCreated: i.dateCreated.toISOString(),
-      dateUpdated: i.dateUpdated.toISOString(),
+      props: { instanceTypes: serialisableInstanceTypes },
     };
-  });
-
-  return {
-    props: { instanceTypes: serialisableInstanceTypes },
   };
-};
 
 const StyledContainer = styled(Container)({
   paddingBottom: "24px",

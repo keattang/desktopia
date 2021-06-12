@@ -1,5 +1,6 @@
 import * as React from "react";
 import { DataGrid, ColDef, ValueGetterParams } from "@material-ui/data-grid";
+import { SerialisedInstanceType } from "../types";
 
 const columns: ColDef[] = [
   { field: "name", headerName: "Instance Type", width: 200 },
@@ -32,7 +33,7 @@ const columns: ColDef[] = [
 ];
 
 interface IProps {
-  instances: object[];
+  instances: SerialisedInstanceType[];
 }
 
 const InstanceTypeList = ({ instances, ...props }: IProps) => {
