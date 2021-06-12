@@ -4,7 +4,7 @@ import {
   GridColDef,
   GridValueGetterParams,
 } from "@material-ui/data-grid";
-import { SerialisedInstanceType } from "../types";
+import { InstanceType } from ".prisma/client";
 
 const columns: GridColDef[] = [
   { field: "name", headerName: "Instance Type", width: 200 },
@@ -17,7 +17,7 @@ const columns: GridColDef[] = [
     width: 130,
     valueGetter: (params: GridValueGetterParams) => {
       const memory = params.value;
-      if (!memory) {
+      if (!memory || typeof memory !== "number") {
         return "-";
       }
       return `${memory / 1024} GB`;
@@ -37,7 +37,7 @@ const columns: GridColDef[] = [
 ];
 
 interface IProps {
-  instances: SerialisedInstanceType[];
+  instances: InstanceType[];
 }
 
 const InstanceTypeList = ({ instances, ...props }: IProps) => {

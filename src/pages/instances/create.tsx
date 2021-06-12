@@ -3,12 +3,10 @@ import Container from "@material-ui/core/Container";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import CreateInstanceForm from "../../components/CreateInstanceForm";
 import prisma from "../../prisma";
-import { SerialisedInstanceType, SerialisedLocation } from "../../types";
-import serialiseDates from "../../utilities/serialiseDates";
 
 interface IServerSideProps {
-  availableLocations: SerialisedLocation[];
-  availableInstanceTypes: SerialisedInstanceType[];
+  availableLocations: Location[];
+  availableInstanceTypes: InstanceType[];
 }
 
 export const getServerSideProps: GetServerSideProps<IServerSideProps> = async ({
@@ -19,18 +17,10 @@ export const getServerSideProps: GetServerSideProps<IServerSideProps> = async ({
     prisma.instanceType.findMany(),
   ]);
 
-  const serialisableLocations = locations.map((x) =>
-    serialiseDates(x, ["dateCreated", "dateUpdated"])
-  );
-
-  const serialisableInstanceTypes = instanceTypes.map((x) =>
-    serialiseDates(x, ["dateCreated", "dateUpdated"])
-  );
-
   return {
     props: {
-      availableLocations: serialisableLocations,
-      availableInstanceTypes: serialisableInstanceTypes,
+      availableLocations: locations,
+      availableInstanceTypes: instanceTypes,
     },
   };
 };

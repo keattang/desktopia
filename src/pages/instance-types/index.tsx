@@ -3,11 +3,10 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import prisma from "../../prisma";
 import InstanceList from "../../components/InstanceTypeList";
 import { Box, styled } from "@material-ui/core";
-import serialiseDates from "../../utilities/serialiseDates";
-import { SerialisedInstanceType } from "../../types";
+import { InstanceType } from ".prisma/client";
 
 interface IServerSideProps {
-  instanceTypes: SerialisedInstanceType[];
+  instanceTypes: InstanceType[];
 }
 
 export const getServerSideProps: GetServerSideProps<IServerSideProps> =
@@ -23,12 +22,8 @@ export const getServerSideProps: GetServerSideProps<IServerSideProps> =
       ],
     });
 
-    const serialisableInstanceTypes = instanceTypes.map((i) =>
-      serialiseDates(i, ["dateCreated", "dateUpdated"])
-    );
-
     return {
-      props: { instanceTypes: serialisableInstanceTypes },
+      props: { instanceTypes: instanceTypes },
     };
   };
 
@@ -42,6 +37,7 @@ const StyledContainer = styled(Container)({
 export default function InstanceTypes({
   instanceTypes,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  console.log(instanceTypes[0].dateCreated);
   return (
     <StyledContainer>
       <h1>Instance Types</h1>
