@@ -1,6 +1,5 @@
-import { InstanceType } from ".prisma/client";
-import { EC2Client, paginateDescribeInstanceTypes } from "@aws-sdk/client-ec2";
-import { paginateGetProducts, PricingClient } from "@aws-sdk/client-pricing";
+import getInstanceTypes from "../aws/getInstanceTypes";
+import getProductPricing from "../aws/getProductPricing";
 
 import {
   SUPPORTED_REGIONS,
@@ -20,85 +19,70 @@ const getInstancePrices = async (
   region: keyof typeof REGIONS,
   operatingSystem: string
 ) => {
-  const pricingClient = new PricingClient({ region: PRICING_API_REGION });
-  const paginator = paginateGetProducts(
-    { client: pricingClient },
-    {
-      Filters: [
-        { Type: "TERM_MATCH", Field: "location", Value: REGIONS[region] },
-        {
-          Type: "TERM_MATCH",
-          Field: "productFamily",
-          Value: "Compute Instance",
-        },
-        {
-          Type: "TERM_MATCH",
-          Field: "operatingSystem",
-          Value: operatingSystem,
-        },
-        {
-          Type: "TERM_MATCH",
-          Field: "capacitystatus",
-          Value: "Used",
-        },
-        {
-          Type: "TERM_MATCH",
-          Field: "licenseModel",
-          Value: "No License required",
-        },
-        {
-          Type: "TERM_MATCH",
-          Field: "tenancy",
-          Value: "Shared",
-        },
-      ],
-      ServiceCode: "AmazonEC2",
-      FormatVersion: "aws_v1",
+  const instancePriceList = await getProductPricing(PRICING_API_REGION, {
+    Filters: [
+      { Type: "TERM_MATCH", Field: "location", Value: REGIONS[region] },
+      {
+        Type: "TERM_MATCH",
+        Field: "productFamily",
+        Value: "Compute Instance",
+      },
+      {
+        Type: "TERM_MATCH",
+        Field: "operatingSystem",
+        Value: operatingSystem,
+      },
+      {
+        Type: "TERM_MATCH",
+        Field: "capacitystatus",
+        Value: "Used",
+      },
+      {
+        Type: "TERM_MATCH",
+        Field: "licenseModel",
+        Value: "No License required",
+      },
+      {
+        Type: "TERM_MATCH",
+        Field: "tenancy",
+        Value: "Shared",
+      },
+    ],
+    ServiceCode: "AmazonEC2",
+    FormatVersion: "aws_v1",
+  });
+
+  return instancePriceList.reduce((agg: { [key: string]: number }, result) => {
+    let resultObj;
+
+    if (typeof result === "string") {
+      resultObj = JSON.parse(result);
+    } else {
+      resultObj = result.deserializeJSON();
     }
-  );
 
-  const instancePrices: { [key: string]: number } = {};
+    const { terms, product } = resultObj;
+    const { instanceType } = product.attributes;
 
-  for await (const page of paginator) {
-    // page contains a single paginated output.
-    page.PriceList?.forEach((result) => {
-      let resultObj;
+    const onDemand = terms.OnDemand[Object.keys(terms.OnDemand)[0]];
+    const priceDimension =
+      onDemand.priceDimensions[Object.keys(onDemand.priceDimensions)[0]];
+    const price = priceDimension.pricePerUnit.USD;
 
-      if (typeof result === "string") {
-        resultObj = JSON.parse(result);
-      } else {
-        resultObj = result.deserializeJSON();
-      }
+    // if (instanceType === "p3.16xlarge") {
+    //   console.log(onDemand);
+    // }
 
-      const { terms, product } = resultObj;
-      const { instanceType } = product.attributes;
-
-      const onDemand = terms.OnDemand[Object.keys(terms.OnDemand)[0]];
-      const priceDimension =
-        onDemand.priceDimensions[Object.keys(onDemand.priceDimensions)[0]];
-      const price = priceDimension.pricePerUnit.USD;
-
-      // if (instanceType === "p3.16xlarge") {
-      //   console.log(onDemand);
-      // }
-
-      instancePrices[instanceType] = parseFloat(price);
-    });
-  }
-
-  return instancePrices;
+    agg[instanceType] = parseFloat(price);
+    return agg;
+  }, {});
 };
 
-const getInstanceTypes = async (region: keyof typeof REGIONS) => {
-  const ec2Client = new EC2Client({ region });
+const getInstanceTypesDict = async (region: keyof typeof REGIONS) => {
+  const instanceTypesList = await getInstanceTypes(region, {});
 
-  const paginator = paginateDescribeInstanceTypes({ client: ec2Client }, {});
-
-  const instanceTypes: { [key: string]: IPartialInstanceType } = {};
-
-  for await (const page of paginator) {
-    // page contains a single paginated output.
-    page.InstanceTypes?.forEach((result) => {
+  return instanceTypesList.reduce(
+    (agg: { [key: string]: IPartialInstanceType }, result) => {
       const { InstanceType, VCpuInfo, MemoryInfo, GpuInfo, NetworkInfo } =
         result;
 
@@ -108,10 +92,10 @@ const getInstanceTypes = async (region: keyof typeof REGIONS) => {
         VCpuInfo.DefaultVCpus === undefined
       ) {
         // We shouldn't ever get here but we need this to satisfy typescript
-        return;
+        return agg;
       }
 
-      instanceTypes[InstanceType] = {
+      agg[InstanceType] = {
         name: InstanceType,
         vCpus: VCpuInfo.DefaultVCpus,
         cores: VCpuInfo.DefaultCores || null,
@@ -119,17 +103,17 @@ const getInstanceTypes = async (region: keyof typeof REGIONS) => {
         networkPerformance: NetworkInfo!.NetworkPerformance!,
         region,
       };
-    });
-  }
-
-  return instanceTypes;
+      return agg;
+    },
+    {}
+  );
 };
 
 const getInstanceTypesWithPrices = async (
   region: keyof typeof REGIONS,
   operatingSystems: string[]
 ) => {
-  const instanceTypes = await getInstanceTypes(region);
+  const instanceTypes = await getInstanceTypesDict(region);
   const instanceTypesWithPrices: { [key: string]: PreSaveInstanceType } = {};
 
   await Promise.all(
