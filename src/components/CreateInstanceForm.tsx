@@ -24,7 +24,7 @@ const CreateInstanceForm = ({
 }: IProps) => {
   const validationSchema = yup.object({
     locationId: yup.string().required("This field is required."),
-    instanceType: yup.string().required("This field is required."),
+    instanceTypeId: yup.string().required("This field is required."),
   });
 
   const formik = useFormik({

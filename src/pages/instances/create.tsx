@@ -14,7 +14,16 @@ export const getServerSideProps: GetServerSideProps<IServerSideProps> = async ({
 }) => {
   const [locations, instanceTypes] = await Promise.all([
     prisma.location.findMany(),
-    prisma.instanceType.findMany(),
+    prisma.instanceType.findMany({
+      orderBy: [
+        {
+          name: "asc",
+        },
+        {
+          vCpus: "asc",
+        },
+      ],
+    }),
   ]);
 
   return {
@@ -47,7 +56,7 @@ const CreateInstance = ({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <Container>
-      <h1>Start Instance</h1>
+      <h1>Run Instance</h1>
       <CreateInstanceForm
         availableLocations={availableLocations}
         availableInstanceTypes={availableInstanceTypes}

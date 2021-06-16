@@ -6,28 +6,13 @@ import {
   Subnet,
 } from "@aws-sdk/client-ec2";
 import { Location } from ".prisma/client";
+import getSubnets from "../../../aws/getSubnets";
+import runInstance from "../../../aws/runInstance";
 
-const getVpcSubnets = async (location: Location): Promise<Subnet[]> => {
-  const ec2Client = new EC2Client({ region: location.region });
-
-  const paginator = paginateDescribeSubnets(
-    { client: ec2Client },
-    { Filters: [{ Name: "vpc-id", Values: [location.vpcId] }] }
-  );
-
-  const subnets = [];
-
-  for await (const page of paginator) {
-    // page contains a single paginated output.
-    if (!page.Subnets) {
-      continue;
-    }
-
-    subnets.push(...page.Subnets);
-  }
-
-  return subnets;
-};
+const getVpcSubnets = (location: Location): Promise<Subnet[]> =>
+  getSubnets(location.region, {
+    Filters: [{ Name: "vpc-id", Values: [location.vpcId] }],
+  });
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { body } = req;
@@ -47,12 +32,32 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const subnets = await getVpcSubnets(location);
+    const subnet = subnets[Math.floor(Math.random() * subnets.length)];
     const params = {
-      InstanceType: instanceType?.name,
+      ImageId: "ami-0fa60543f60171fe3", // Windows Server 2019
+      InstanceType: instanceType.name,
+      SubnetId: subnet.SubnetId,
       //   SecurityGroups: [],
+      InstanceInitiatedShutdownBehavior: "stop",
+      // IamInstanceProfile: {}
+      UserData: "",
+      MinCount: 1,
+      MaxCount: 1,
     };
+
+    const resp = await runInstance(location.region, params);
+    const instance = resp.Instances?.[0];
+
+    if (!instance || !instance.InstanceId) {
+      res
+        .status(500)
+        .json({ data: "Something went wrong. Could not start instance" });
+      return;
+    }
+
     const software = await prisma.instance.create({
       data: {
+        instanceId: instance.InstanceId,
         instanceTypeId: body.instanceTypeId,
         locationId: body.locationId,
       },
