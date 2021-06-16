@@ -4,11 +4,10 @@ type UnPaginate<T> = T extends Paginator<infer U> ? U : T;
 type UnArray<T> = T extends Array<infer U> ? U : T;
 
 const _getPaginatedObjects = <
-  C extends { new (...args: any): any },
   P extends (...args: any) => any,
   T extends keyof UnPaginate<ReturnType<P>>
 >(
-  ClientClass: C,
+  ClientClass: new (...args: any) => Parameters<P>[0]["client"],
   paginatorFunction: P,
   key: T
 ) => {
