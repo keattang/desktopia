@@ -28,12 +28,9 @@ const syncInstance = async (region: string, instance: Instance) => {
   };
 
   if (!dbInstance.password || dbInstance.password === "") {
-    console.log("Getting instance password");
     const password = await getInstancePassword(region, instance.InstanceId!);
     updateData.password = password;
   }
-
-  console.log(updateData);
 
   return prisma.instance.update({
     where: {
