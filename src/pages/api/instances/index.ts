@@ -1,13 +1,11 @@
 import prisma from "../../../prisma";
 import type { NextApiRequest, NextApiResponse } from "next";
-import {
-  EC2Client,
-  paginateDescribeSubnets,
-  Subnet,
-} from "@aws-sdk/client-ec2";
+import { RunInstancesCommandInput, Subnet } from "@aws-sdk/client-ec2";
 import { Location } from ".prisma/client";
 import getSubnets from "../../../aws/getSubnets";
 import runInstance from "../../../aws/runInstance";
+import { MANAGED_TAG_KEY } from "../../../constants";
+import { KEY_PAIR_NAME } from "../../../config";
 
 const getVpcSubnets = (location: Location): Promise<Subnet[]> =>
   getSubnets(location.region, {
@@ -33,16 +31,23 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const subnets = await getVpcSubnets(location);
     const subnet = subnets[Math.floor(Math.random() * subnets.length)];
-    const params = {
+    const params: RunInstancesCommandInput = {
       ImageId: "ami-0fa60543f60171fe3", // Windows Server 2019
       InstanceType: instanceType.name,
       SubnetId: subnet.SubnetId,
       //   SecurityGroups: [],
       InstanceInitiatedShutdownBehavior: "stop",
       // IamInstanceProfile: {}
+      KeyName: KEY_PAIR_NAME,
       UserData: "",
       MinCount: 1,
       MaxCount: 1,
+      TagSpecifications: [
+        {
+          ResourceType: "instance",
+          Tags: [{ Key: MANAGED_TAG_KEY, Value: "true" }],
+        },
+      ],
     };
 
     const resp = await runInstance(location.region, params);
@@ -60,6 +65,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         instanceId: instance.InstanceId,
         instanceTypeId: body.instanceTypeId,
         locationId: body.locationId,
+        state: instance.State!.Name!,
       },
     });
     res.status(201).json({ data: { id: software.id } });

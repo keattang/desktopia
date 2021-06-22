@@ -1,4 +1,5 @@
-import { InstanceType, PrismaClient } from ".prisma/client";
+import { InstanceType, Instance, PrismaClient } from ".prisma/client";
+import { Location } from "@prisma/client";
 
 // Fixes issues in prisma.ts
 declare global {
@@ -12,3 +13,8 @@ declare global {
 type CommonAutoFields = "id" | "dateCreated" | "dateUpdated";
 
 type PreSaveInstanceType = Omit<InstanceType, CommonAutoFields>;
+
+interface ExpandedInstance extends Instance {
+  location: Location;
+  instanceType: InstanceType;
+}

@@ -25,3 +25,6 @@ export const SUPPORTED_REGIONS: Array<keyof typeof REGIONS> = [
 export const PRICING_API_REGION = "us-east-1";
 
 export const SUPPORTED_OPERATING_SYSTEMS = ["Windows"];
+
+export const TAG_PREFIX = "desktopia";
+export const MANAGED_TAG_KEY = `${TAG_PREFIX}:managed`;

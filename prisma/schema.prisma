@@ -40,11 +40,13 @@ model Location {
 
 model Instance {
   id             String       @id @default(uuid())
-  instanceId     String
+  instanceId     String       @unique
+  state          String?
   instanceType   InstanceType @relation(fields: [instanceTypeId], references: [id])
   instanceTypeId String
   location       Location     @relation(fields: [locationId], references: [id])
   locationId     String
+  password       String?
   dateCreated    DateTime     @default(now())
   dateUpdated    DateTime     @updatedAt
 }
