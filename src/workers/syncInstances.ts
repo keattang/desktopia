@@ -1,13 +1,9 @@
 import { Instance } from "@aws-sdk/client-ec2";
+import { Instance as DBInstance } from "@prisma/client";
 import getInstancePassword from "../aws/getInstancePassword";
 import getInstances from "../aws/getInstances";
 import { MANAGED_TAG_KEY, SUPPORTED_REGIONS } from "../constants";
 import prisma from "../prisma";
-
-interface IUpdateData {
-  state?: string;
-  password?: string;
-}
 
 const syncInstance = async (region: string, instance: Instance) => {
   const instanceId = instance.InstanceId!;
@@ -22,8 +18,9 @@ const syncInstance = async (region: string, instance: Instance) => {
     return;
   }
 
-  const updateData: IUpdateData = {
+  const updateData: Partial<DBInstance> = {
     state: instance.State?.Name,
+    publicDnsName: instance.PublicDnsName,
     password: undefined,
   };
 

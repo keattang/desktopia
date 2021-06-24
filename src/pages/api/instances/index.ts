@@ -65,7 +65,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         instanceId: instance.InstanceId,
         instanceTypeId: body.instanceTypeId,
         locationId: body.locationId,
-        state: instance.State!.Name!,
+        state: instance.State?.Name,
+        publicDnsName: instance.PublicDnsName,
       },
     });
     res.status(201).json({ data: { id: software.id } });

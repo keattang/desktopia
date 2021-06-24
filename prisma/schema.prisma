@@ -47,6 +47,7 @@ model Instance {
   location       Location     @relation(fields: [locationId], references: [id])
   locationId     String
   password       String?
+  publicDnsName  String?
   dateCreated    DateTime     @default(now())
   dateUpdated    DateTime     @updatedAt
 }

@@ -3,23 +3,27 @@ import {
   DataGrid,
   GridColDef,
   GridValueGetterParams,
+  GridValueFormatterParams,
+  GridCellParams,
 } from "@material-ui/data-grid";
-import { ExpandedInstance } from "../types";
+import { ExpandedInstance, HandleRequestPassword } from "../types";
+import HiddenPassword from "./HiddenPassword";
+import Button from "@material-ui/core/Button";
 
-const columns: GridColDef[] = [
+const getColumns = (onRequestPassword: HandleRequestPassword): GridColDef[] => [
   { field: "instanceId", headerName: "Instance ID", width: 200 },
-  { field: "state", headerName: "State", width: 200 },
+  { field: "state", headerName: "State", width: 150 },
   {
     field: "location.name",
     headerName: "Location",
-    width: 200,
+    width: 150,
     valueGetter: (params: GridValueGetterParams) => params.row.location.name,
   },
   {
     field: "instanceType.vCpus",
     headerName: "vCPUs",
     type: "number",
-    width: 130,
+    width: 120,
     valueGetter: (params: GridValueGetterParams) =>
       params.row.instanceType.vCpus,
   },
@@ -28,8 +32,10 @@ const columns: GridColDef[] = [
     headerName: "Memory",
     type: "number",
     width: 130,
-    valueGetter: (params: GridValueGetterParams) => {
-      const memory = params.row.instanceType.memory;
+    valueGetter: (params: GridValueGetterParams) =>
+      params.row.instanceType.memory,
+    valueFormatter: (params: GridValueFormatterParams) => {
+      const memory = params.value;
       if (!memory || typeof memory !== "number") {
         return "-";
       }
@@ -41,22 +47,51 @@ const columns: GridColDef[] = [
     headerName: "Price / Hour",
     width: 160,
     valueGetter: (params: GridValueGetterParams) =>
-      `$${params.row.instanceType.pricePerHour}`,
+      params.row.instanceType.pricePerHour,
+    valueFormatter: (params: GridValueFormatterParams) => `$${params.value}`,
   },
   {
     field: "dateCreated",
     headerName: "Launch Date",
     width: 160,
-    valueGetter: (params: GridValueGetterParams) =>
+    valueFormatter: (params: GridValueFormatterParams) =>
       params.value?.toLocaleString(),
+  },
+  {
+    field: "password",
+    headerName: "Password",
+    width: 160,
+    renderCell: (params: GridCellParams) =>
+      params.value ? (
+        <HiddenPassword
+          onRequestPassword={() => onRequestPassword(params.row.id)}
+        />
+      ) : (
+        "Not yet available."
+      ),
+  },
+  {
+    field: "publicDnsName",
+    headerName: "Connection File",
+    width: 180,
+    renderCell: (params: GridCellParams) =>
+      params.value ? (
+        <Button href={`/api/instances/${params.row.id}/connection-file`}>
+          Download
+        </Button>
+      ) : (
+        "Not yet available."
+      ),
   },
 ];
 
 interface IProps {
   instances: ExpandedInstance[];
+  onRequestPassword: HandleRequestPassword;
 }
 
-const InstanceList = ({ instances, ...props }: IProps) => {
+const InstanceList = ({ instances, onRequestPassword, ...props }: IProps) => {
+  const columns = getColumns(onRequestPassword);
   return <DataGrid rows={instances} columns={columns} {...props} />;
 };
 
