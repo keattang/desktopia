@@ -4,7 +4,11 @@ import Link from "next/link";
 import prisma from "../../prisma";
 import InstanceList from "../../components/InstanceList";
 import { Box, Button, styled } from "@material-ui/core";
-import { ExpandedInstance, HandleRequestPassword } from "../../types";
+import {
+  ExpandedInstance,
+  HandleRequestPassword,
+  HandleTerminateInstance,
+} from "../../types";
 interface IServerSideProps {
   instances: ExpandedInstance[];
 }
@@ -43,6 +47,13 @@ const handleRequestPassword: HandleRequestPassword = async (instanceId) => {
   return payload.data.password;
 };
 
+const handleTerminateInstance: HandleTerminateInstance = async (instanceId) => {
+  const resp = await fetch(`/api/instances/${instanceId}/terminate`, {
+    method: "POST",
+  });
+  return resp.json();
+};
+
 const Instances = ({
   instances,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
@@ -52,6 +63,7 @@ const Instances = ({
       <Box flexGrow={1}>
         <InstanceList
           onRequestPassword={handleRequestPassword}
+          onTerminateInstance={handleTerminateInstance}
           instances={instances}
         />
       </Box>

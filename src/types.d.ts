@@ -1,4 +1,5 @@
 import { InstanceType, Instance, PrismaClient } from ".prisma/client";
+import { TerminateInstancesCommandOutput } from "@aws-sdk/client-ec2";
 import { Location } from "@prisma/client";
 
 type CommonAutoFields = "id" | "dateCreated" | "dateUpdated";
@@ -13,6 +14,10 @@ interface ExpandedInstance extends Instance {
 type HandleRequestPassword = (
   instanceId: string
 ) => Promise<string | undefined>;
+
+type HandleTerminateInstance = (
+  instanceId: string
+) => Promise<TerminateInstancesCommandOutput["TerminatingInstances"][0]>;
 
 type CreateLocationData = Pick<
   Location,

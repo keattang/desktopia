@@ -28,3 +28,10 @@ export const SUPPORTED_OPERATING_SYSTEMS = ["Windows"];
 
 export const TAG_PREFIX = "desktopia";
 export const MANAGED_TAG_KEY = `${TAG_PREFIX}:managed`;
+
+export const TERMINATABLE_STATES = [
+  "pending",
+  "running",
+  "stopping",
+  "stopped",
+];

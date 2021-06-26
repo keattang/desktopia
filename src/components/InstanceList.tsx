@@ -6,11 +6,19 @@ import {
   GridValueFormatterParams,
   GridCellParams,
 } from "@material-ui/data-grid";
-import { ExpandedInstance, HandleRequestPassword } from "../types";
+import {
+  ExpandedInstance,
+  HandleRequestPassword,
+  HandleTerminateInstance,
+} from "../types";
 import HiddenPassword from "./HiddenPassword";
 import Button from "@material-ui/core/Button";
+import { TERMINATABLE_STATES } from "../constants";
 
-const getColumns = (onRequestPassword: HandleRequestPassword): GridColDef[] => [
+const getColumns = (
+  onRequestPassword: HandleRequestPassword,
+  onTerminateInstance: HandleTerminateInstance
+): GridColDef[] => [
   { field: "instanceId", headerName: "Instance ID", width: 200 },
   { field: "state", headerName: "State", width: 150 },
   {
@@ -83,15 +91,41 @@ const getColumns = (onRequestPassword: HandleRequestPassword): GridColDef[] => [
         "Not yet available."
       ),
   },
+  {
+    field: "terminate",
+    headerName: "Terminate",
+    width: 180,
+    valueGetter: (params: GridValueGetterParams) => params.row.state,
+    renderCell: (params: GridCellParams) => {
+      const enabled =
+        params.value &&
+        typeof params.value === "string" && // Required for typescript
+        TERMINATABLE_STATES.includes(params.value);
+      return (
+        <Button
+          onClick={() => onTerminateInstance(params.row.id)}
+          disabled={!enabled}
+        >
+          Terminate
+        </Button>
+      );
+    },
+  },
 ];
 
 interface IProps {
   instances: ExpandedInstance[];
   onRequestPassword: HandleRequestPassword;
+  onTerminateInstance: HandleTerminateInstance;
 }
 
-const InstanceList = ({ instances, onRequestPassword, ...props }: IProps) => {
-  const columns = getColumns(onRequestPassword);
+const InstanceList = ({
+  instances,
+  onRequestPassword,
+  onTerminateInstance,
+  ...props
+}: IProps) => {
+  const columns = getColumns(onRequestPassword, onTerminateInstance);
   return <DataGrid rows={instances} columns={columns} {...props} />;
 };
 
