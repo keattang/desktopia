@@ -69,10 +69,6 @@ const getInstancePrices = async (
       onDemand.priceDimensions[Object.keys(onDemand.priceDimensions)[0]];
     const price = priceDimension.pricePerUnit.USD;
 
-    // if (instanceType === "p3.16xlarge") {
-    //   console.log(onDemand);
-    // }
-
     agg[instanceType] = parseFloat(price);
     return agg;
   }, {});

@@ -29,13 +29,15 @@ model InstanceType {
 }
 
 model Location {
-  id          String     @id @default(uuid())
+  id          String   @id @default(uuid())
   name        String
   region      String
-  vpcId       String     @unique
-  dateCreated DateTime   @default(now())
-  dateUpdated DateTime   @updatedAt
-  Instance    Instance[]
+  vpcId       String
+  subnetIds   String[]
+  dateCreated DateTime @default(now())
+  dateUpdated DateTime @updatedAt
+
+  instances Instance[]
 }
 
 model Instance {

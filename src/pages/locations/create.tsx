@@ -2,7 +2,8 @@ import Container from "@material-ui/core/Container";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { SUPPORTED_REGIONS } from "../../constants";
 import CreateLocationForm from "../../components/CreateLocationForm";
-import { Vpc } from "@aws-sdk/client-ec2";
+import { Subnet, Vpc } from "@aws-sdk/client-ec2";
+import { CreateLocationData } from "../../types";
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   return {
@@ -10,13 +11,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   };
 };
 
-interface ICreateLocationData {
-  name: string;
-  region: string;
-  vpcId: string;
-}
-
-const createLocation = async (data: ICreateLocationData) => {
+const createLocation = async (data: CreateLocationData) => {
   const resp = await fetch("/api/locations", {
     method: "POST",
     headers: {
@@ -34,6 +29,16 @@ const fetchVpcs = async (region: string): Promise<Vpc[]> => {
   return (await resp.json()).data;
 };
 
+const fetchSubnets = async (
+  region: string,
+  vpcId: string
+): Promise<Subnet[]> => {
+  const resp = await fetch(`/api/vpcs/${vpcId}/subnets?region=${region}`, {
+    method: "GET",
+  });
+  return (await resp.json()).data;
+};
+
 const CreateLocation = ({
   availableRegions,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
@@ -44,6 +49,7 @@ const CreateLocation = ({
         availableRegions={availableRegions}
         onSubmit={createLocation}
         onFetchVpcs={fetchVpcs}
+        onFetchSubnets={fetchSubnets}
       />
     </Container>
   );

@@ -13,3 +13,8 @@ interface ExpandedInstance extends Instance {
 type HandleRequestPassword = (
   instanceId: string
 ) => Promise<string | undefined>;
+
+type CreateLocationData = Pick<
+  Location,
+  "name" | "region" | "vpcId" | "subnetIds"
+>;

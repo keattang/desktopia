@@ -1,6 +1,7 @@
 import { InstanceType, Location } from ".prisma/client";
 import Container from "@material-ui/core/Container";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { useRouter } from "next/dist/client/router";
 import CreateInstanceForm from "../../components/CreateInstanceForm";
 import prisma from "../../prisma";
 
@@ -54,13 +55,20 @@ const CreateInstance = ({
   availableLocations,
   availableInstanceTypes,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const router = useRouter();
+
+  const handleSubmit = async (values: ICreateInstanceData) => {
+    await createInstance(values);
+    router.push("/instances");
+  };
+
   return (
     <Container>
-      <h1>Run Instance</h1>
+      <h1>Launch Instance</h1>
       <CreateInstanceForm
         availableLocations={availableLocations}
         availableInstanceTypes={availableInstanceTypes}
-        onSubmit={createInstance}
+        onSubmit={handleSubmit}
       />
     </Container>
   );

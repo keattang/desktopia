@@ -29,12 +29,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return;
     }
 
-    const subnets = await getVpcSubnets(location);
-    const subnet = subnets[Math.floor(Math.random() * subnets.length)];
+    const subnetId =
+      location.subnetIds[Math.floor(Math.random() * location.subnetIds.length)];
+
     const params: RunInstancesCommandInput = {
-      ImageId: "ami-0fa60543f60171fe3", // Windows Server 2019
+      ImageId: "ami-077f1edd46ddb3129", // Windows Server 2019
       InstanceType: instanceType.name,
-      SubnetId: subnet.SubnetId,
+      SubnetId: subnetId,
       //   SecurityGroups: [],
       InstanceInitiatedShutdownBehavior: "stop",
       // IamInstanceProfile: {}

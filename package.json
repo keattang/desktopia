@@ -9,7 +9,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
-    "sync-instance-types": "ts-node ./src/scripts/syncEc2InstanceTypes.ts"
+    "sync-instance-types": "ts-node ./src/scripts/syncEc2InstanceTypes.ts",
+    "sync-instances": "ts-node ./src/workers/syncInstances.ts"
   },
   "dependencies": {
     "@aws-sdk/client-ec2": "^3.17.0",

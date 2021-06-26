@@ -1,10 +1,10 @@
 import Container from "@material-ui/core/Container";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import Link from "next/link";
 import prisma from "../../prisma";
 import InstanceList from "../../components/InstanceList";
-import { Box, styled } from "@material-ui/core";
+import { Box, Button, styled } from "@material-ui/core";
 import { ExpandedInstance, HandleRequestPassword } from "../../types";
-
 interface IServerSideProps {
   instances: ExpandedInstance[];
 }
@@ -55,6 +55,9 @@ const Instances = ({
           instances={instances}
         />
       </Box>
+      <Link href="/instances/create" passHref>
+        <Button>Launch Instance</Button>
+      </Link>
     </StyledContainer>
   );
 };

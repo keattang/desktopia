@@ -37,7 +37,6 @@ const StyledContainer = styled(Container)({
 export default function InstanceTypes({
   instanceTypes,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  console.log(instanceTypes[0].dateCreated);
   return (
     <StyledContainer>
       <h1>Instance Types</h1>

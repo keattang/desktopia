@@ -9,6 +9,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         name: body.name,
         region: body.region,
         vpcId: body.vpcId,
+        subnetIds: body.subnetIds,
       },
     });
     res.status(201).json({ data: { id: software.id } });
