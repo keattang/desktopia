@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "../../../../prisma";
 import coalesceQueryParam from "../../../../utilities/getQueryParam";
-import decryptPassword from "../../../../utilities/decryptPassword";
+import { dispatcher } from "../../../../actions";
+import { GET_INSTANCE_PASSWORD } from "../../../../actions/handlers/getInstancePassword";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { query } = req;
@@ -18,9 +19,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(409).json({ data: "Password not yet available" });
     }
 
-    res
-      .status(200)
-      .json({ data: { password: decryptPassword(instance.password) } });
+    const password = await dispatcher.dispatch({
+      type: GET_INSTANCE_PASSWORD,
+      payload: instance,
+    });
+
+    res.status(200).json({ data: { password } });
   } else {
     res.status(405).json({ detail: "Method not allowed." });
   }

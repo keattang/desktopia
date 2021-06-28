@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "../../../../prisma";
 import coalesceQueryParam from "../../../../utilities/getQueryParam";
-import terminateInstances from "../../../../aws/terminateInstances";
+import { dispatcher } from "../../../../actions";
+import { TERMINATE_INSTANCE } from "../../../../actions/handlers/terminateInstance";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { query } = req;
@@ -16,8 +17,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (!instance) {
       return res.status(404).json({ data: "Not found" });
     }
-    const resp = await terminateInstances(instance.location.region, {
-      InstanceIds: [instance.instanceId],
+
+    const resp = await dispatcher.dispatch({
+      type: TERMINATE_INSTANCE,
+      payload: instance,
     });
 
     res.status(200).json({ data: resp.TerminatingInstances?.[0] });

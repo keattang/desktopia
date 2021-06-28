@@ -1,18 +1,15 @@
-import prisma from "../../../prisma";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { dispatcher } from "../../../actions";
+import { CREATE_LOCATION } from "../../../actions/handlers/createLocation";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { body } = req;
   if (req.method === "POST") {
-    const software = await prisma.location.create({
-      data: {
-        name: body.name,
-        region: body.region,
-        vpcId: body.vpcId,
-        subnetIds: body.subnetIds,
-      },
+    const location = await dispatcher.dispatch({
+      type: CREATE_LOCATION,
+      payload: body,
     });
-    res.status(201).json({ data: { id: software.id } });
+    res.status(201).json({ data: location });
   } else {
     res.status(405).json({ detail: "Method not allowed." });
   }
